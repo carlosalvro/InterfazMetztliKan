@@ -9,6 +9,7 @@ from dash_html_components.I import I
 from dash_html_components.Section import Section
 import numpy as np
 import cv2
+from numpy.lib.type_check import imag
 import plotly.express as px
 import os
 import functions
@@ -16,20 +17,9 @@ import functions
 PATH_IMGS = r'../Imagenes'
 IMGS = os.listdir(PATH_IMGS)
 IMGS_PATH = [os.path.join(PATH_IMGS,i) for i in IMGS ]
+min_default = [0,0,0]
+max_default = [180,255,255]
 
-#########FUNCIONES#################
-def plot_figure(file):
-  img = cv2.imread(file)
-  img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-  fig = px.imshow(img)
-  fig.update_layout(
-    paper_bgcolor='rgba(0,0,0,0)',
-    plot_bgcolor='rgba(0,0,0,0)',
-    margin=dict(l=20, r=20, t=20, b=20)
-  )
-  fig.update_xaxes(showticklabels=False).update_yaxes(showticklabels=False)
-  return fig
-################################
 
 app = dash.Dash(__name__)
 
@@ -239,9 +229,15 @@ app.layout= html.Div(
                             html.Div(
                               className='graph-container',
                               children=[
-                                dcc.Graph(
-                                  className='graph',
-                                  figure = plot_figure(IMGS_PATH[1]) 
+                                html.Div(
+                                  className= "image-container",
+                                  id= "imagen-cansat",
+                                  children = [
+                                    dcc.Graph(
+                                    className='graph',
+                                    figure=functions.plot_image(IMGS_PATH[1], min_default, max_default)
+                                    ),
+                                  ]
                                 ),
                                 html.Div(
                                   className='graph-buttons',
@@ -335,6 +331,52 @@ app.layout= html.Div(
   ]
 )
 
+gau = 0
+med = 0
+res = 0
+
+@app.callback(
+  dash.dependencies.Output("imagen-cansat", "children"),
+  [dash.dependencies.Input('boton-adelante','n_clicks'),
+  dash.dependencies.Input('boton-atras','n_clicks'),
+  dash.dependencies.Input('H-slider','value'),
+  dash.dependencies.Input('S-slider','value'),
+  dash.dependencies.Input('V-slider','value'),
+  dash.dependencies.Input('gauss','n_clicks'),
+  dash.dependencies.Input('median','n_clicks'),
+  dash.dependencies.Input('reset','n_clicks')]
+)
+def prueba(adelante, atras, H, S, V, gauss, median, reset):
+  global gau, med, res
+
+  image_number = adelante - atras
+  image = IMGS_PATH[image_number]
+  min = [H[0], S[0], V[0]]
+  max = [H[1], S[1], V[1]]
+
+  if gauss!=gau:
+    image = functions.gaussian_blur(image)
+    print("Apply 1 time gauss")
+    gau = gauss
+  else:
+    pass
+
+  if median!=med:
+    image = functions.median_blur(image)
+    print("Apply 1 time median")
+    med =median
+
+  if reset!= res:
+    image = IMGS_PATH[image_number]
+    res = reset
+  else:
+    pass
+  
+  return [dcc.Graph(
+            className='graph',
+            figure= functions.plot_image(image, min, max)
+          ),
+        html.P(f'H: {H}  S: {S}  V: {V}')]
 
 
 if __name__=='__main__':

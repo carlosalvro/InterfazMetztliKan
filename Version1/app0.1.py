@@ -40,7 +40,7 @@ def mask_HSV(imgRGB, min, max):
 
 
 
-PATH_IMGS = r'../Imagenes/'
+PATH_IMGS = r'../../Imagenes/'
 IMGS = os.listdir(PATH_IMGS)
 IMGS_PATH = [os.path.join(PATH_IMGS,i) for i in IMGS ]
 min_defa = [0,0,0]
