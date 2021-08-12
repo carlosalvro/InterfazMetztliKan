@@ -5,6 +5,8 @@ import plotly.graph_objects as go
 import cv2
 import os 
 import plotly.express as px
+import serial
+
 
 
 
@@ -141,4 +143,7 @@ def gaussian_blur(file):
   return filtro  
 
 
-
+def open_serial():
+  ser = serial.Serial('/dev/pts/5')
+  num = ser.readline()
+  return num.decode('utf-8')

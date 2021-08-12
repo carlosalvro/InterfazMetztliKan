@@ -16,7 +16,6 @@ html {
   font-size: 62.5%;
 }
 body {
-  overflow: hidden;
   font-family: 'Lato', sans-serif;
   background: linear-gradient(180deg, var(--dark) 0%, var(--regular) 100%);
   background-size: cover;
@@ -35,7 +34,6 @@ body {
   height: 100vh;
 }
 .main {
-  height: 100%;
   display: flex;
   justify-content: center;
   position: relative;
@@ -236,7 +234,6 @@ h2 {
 .principal-metrica {
   /* background: rgba(255, 255, 255, 0.01); */
   width: 90vw;
-  height: 95%;
   border-radius: 10px;
   display: grid;
   grid-template: repeat(4, 1fr) / repeat(6, 1fr);

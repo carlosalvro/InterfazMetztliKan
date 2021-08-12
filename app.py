@@ -37,7 +37,7 @@ app.layout= html.Div(
       children=[
         dcc.Tabs(className='main-tabs',
                 #  vertical=True,
-                 value='tab-metrica',children=[
+                  value='tab-metrica',children=[
           ###Aqui comienzan los tabs
           dcc.Tab(id='tab-metrica',
                   className='custom-tab',
@@ -45,8 +45,11 @@ app.layout= html.Div(
                   label='Métrica', 
                   value='tab-metrica', children=[
                     ###Contenido del primer tab
-
-
+                    dcc.Interval(
+                        id='interval-component',
+                        interval=1*500, # in milliseconds
+                        n_intervals=0
+                    ),
                     html.Div(
                       className='tab-section',
                       children=[
@@ -102,7 +105,7 @@ app.layout= html.Div(
                               className="card-1 humedad",
                               children = [
                                 html.H4("Humedad"),
-                                html.H3("3"),
+                                html.H3(id='humedad', children="3"),
                               ]
                             ),
                             html.Div(
@@ -218,7 +221,7 @@ app.layout= html.Div(
                   label='Imagen', 
                   value='tab-image', children=[
                     ###Contenido del segundo tab
-                   
+                  
                     html.Div(
                       className='tab-section',
                       children=[
@@ -330,6 +333,14 @@ app.layout= html.Div(
     )
   ]
 )
+
+@app.callback(
+  dash.dependencies.Output('humedad', 'children'),
+  [dash.dependencies.Input('interval-component', 'n_intervals')] 
+)
+def prueba2(n):
+  return functions.open_serial()
+
 
 gau = 0
 med = 0
