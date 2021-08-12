@@ -29,7 +29,7 @@ app.layout= html.Div(
   children=[
     html.Div(
       className='header', children=[
-        html.Img(src='./assets/Images/Logo-Horizontal-SpaceSat.png', className='logo')
+        html.Img(src='./assets/Images/Kan-Horizontal.png', className='logo')
       ]
     ),
     html.Section(
