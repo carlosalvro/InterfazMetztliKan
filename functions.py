@@ -6,6 +6,7 @@ import cv2
 import os 
 import plotly.express as px
 import serial
+import json
 
 
 
@@ -145,5 +146,21 @@ def gaussian_blur(file):
 
 def open_serial():
   ser = serial.Serial('/dev/pts/5')
-  num = ser.readline()
-  return num.decode('utf-8')
+  decode_data = ser.readline().decode('utf-8')
+  dic = json.loads(decode_data)
+  output = [
+    dic['Al'],
+    dic['Al'],
+    dic['La'],
+    dic['Lo'],
+    dic['Te'],
+    dic['Pr'],
+    dic['Hu'],
+    dic['Ax'],
+    dic['Ay'],
+    dic['Az'],
+    dic['Gx'],
+    dic['Gy'],
+    dic['Gz'],
+  ]
+  return output

@@ -1,67 +1,71 @@
 import dash
 import dash_core_components as dcc
-from dash_core_components.Graph import Graph
 import dash_html_components as html
-from dash_html_components.Div import Div
-from dash_html_components.H3 import H3
-from dash_html_components.H4 import H4
-from dash_html_components.I import I
-from dash_html_components.Section import Section
-import numpy as np
-import cv2
-from numpy.lib.type_check import imag
-import plotly.express as px
 import os
 import functions
 
+### UBICAMOS LA CARPETA DE IMAGENES PARA LLAMARLAS ###############
 PATH_IMGS = r'../Imagenes'
 IMGS = os.listdir(PATH_IMGS)
 IMGS_PATH = [os.path.join(PATH_IMGS,i) for i in IMGS ]
+### DEFINIMOS LOS LIMOTES DE HSV respectivamente ##################3
 min_default = [0,0,0]
 max_default = [180,255,255]
 
-
+##### INICIAMOS LA APP #####
 app = dash.Dash(__name__)
 
-
+##### AQUI VA TODA LA ESTRUCTURA DE NUESTRA PAGINA 
 app.layout= html.Div(
+  #CONTENEDOR PRINCIPAL
   className="main-container",
   children=[
+    # CABEZERA DONDE VA EL LOGO
     html.Div(
       className='header', children=[
         html.Img(src='./assets/Images/Kan-Horizontal.png', className='logo')
       ]
     ),
+    # aqui va todo lo demás
     html.Section(
       className='main',
       children=[
+        # iniciamos componente de los tabs (las pestañas para cambiar de métrica a imagen)
         dcc.Tabs(className='main-tabs',
                 #  vertical=True,
                   value='tab-metrica',children=[
-          ###Aqui comienzan los tabs
+          # iniciamos el primer tab de metrica
           dcc.Tab(id='tab-metrica',
                   className='custom-tab',
                   selected_className='custom-tab--selected', 
                   label='Métrica', 
                   value='tab-metrica', children=[
                     ###Contenido del primer tab
+
+####Este componente interval es muy importante, es el que nos da el tiempo de actualización de la página                    
+                    #ES SU UNÍCO PROPOSITO (ES INVISIBLE, NO SE MOSTRARÁ NADA EN LA PÁGINA)
                     dcc.Interval(
                         id='interval-component',
-                        interval=1*500, # in milliseconds
+                        interval=500, # milisegundos
                         n_intervals=0
                     ),
+                    # aqui comienza el contenedor de metricas
+                    # IMAGEN
                     html.Div(
                       className='tab-section',
                       children=[
+                        #TITULO
                         html.H2('Métrica'),
+                        #CONTENEDOR PRINCIPAL
                         html.Div(
                           className='principal-metrica',
                           children=[
+                            #CONTENEDOR GRÁFICA
                             html.Div(
                               className="card-1 altitud",
                               children = [
                                 html.H4("Altitud"),
-                                html.H3("120"),
+                                html.H3(id='altitud', children="120"),
                                 html.P("metros")
                               ]
                             ),
@@ -72,8 +76,8 @@ app.layout= html.Div(
                                 html.Div(
                                   className="subcard-2 values-2",
                                   children = [
-                                    html.H3("128.5"),
-                                    html.H3("-103.9")
+                                    html.H3(id='latitud', children="128.5"),
+                                    html.H3(id='longitud', children="-103.9")
                                   ]
                                 ),
                                 html.Div(
@@ -89,7 +93,7 @@ app.layout= html.Div(
                               className="card-1 temperatura",
                               children = [
                                 html.H4("Temperatura"),
-                                html.H3("30"),
+                                html.H3(id='temperatura', children="30"),
                                 html.P("°C")
                               ]
                             ),
@@ -97,7 +101,7 @@ app.layout= html.Div(
                               className="card-1 presión",
                               children = [
                                 html.H4("Presión"),
-                                html.H3("2"),
+                                html.H3(id ='presion', children="2"),
                                 html.P("Pa")
                               ]
                             ),
@@ -115,9 +119,9 @@ app.layout= html.Div(
                                 html.Div(
                                   className="subcard-3 values-3",
                                   children = [
-                                    html.H3("128.5"),
-                                    html.H3("-103.9"),
-                                    html.H3("150.0")
+                                    html.H3(id ='aceleX', children="128.5"),
+                                    html.H3(id ='aceleY', children="-103.9"),
+                                    html.H3(id ='aceleZ', children="150.0")
                                   ]
                                 ),
                                 html.Div(
@@ -137,9 +141,9 @@ app.layout= html.Div(
                                 html.Div(
                                   className="subcard-3 values-3",
                                   children = [
-                                    html.H3("128.5"),
-                                    html.H3("-103.9"),
-                                    html.H3("150.0")
+                                    html.H3(id ='giroX', children="128.5"),
+                                    html.H3(id ='giroY', children="-103.9"),
+                                    html.H3(id ='giroZ', children="150.0")
                                   ]
                                 ),
                                 html.Div(
@@ -335,11 +339,35 @@ app.layout= html.Div(
 )
 
 @app.callback(
+  dash.dependencies.Output('altitud', 'children'),
+  dash.dependencies.Output('latitud', 'children'),
+  dash.dependencies.Output('longitud', 'children'),
+  dash.dependencies.Output('temperatura', 'children'),
+  dash.dependencies.Output('presion', 'children'),
   dash.dependencies.Output('humedad', 'children'),
+  dash.dependencies.Output('aceleX', 'children'),
+  dash.dependencies.Output('aceleY', 'children'),
+  dash.dependencies.Output('aceleZ', 'children'),
+  dash.dependencies.Output('giroX', 'children'),
+  dash.dependencies.Output('giroY', 'children'),
+  dash.dependencies.Output('giroZ', 'children'),
   [dash.dependencies.Input('interval-component', 'n_intervals')] 
 )
-def prueba2(n):
-  return functions.open_serial()
+def data_listener(n):
+  output = functions.open_serial()
+  al = output[0]
+  la = output[1]
+  lo = output[2]
+  te = output[3]
+  pr = output[4]
+  hu = output[5]
+  ax = output[6]
+  ay = output[7]
+  az = output[8]
+  gx = output[9]
+  gy = output[10]
+  gz = output[11]
+  return al, la, lo, te, pr, hu, ax, ay, az, gx, gy, gz
 
 
 gau = 0
@@ -357,7 +385,7 @@ res = 0
   dash.dependencies.Input('median','n_clicks'),
   dash.dependencies.Input('reset','n_clicks')]
 )
-def prueba(adelante, atras, H, S, V, gauss, median, reset):
+def image_controler(adelante, atras, H, S, V, gauss, median, reset):
   global gau, med, res
 
   image_number = adelante - atras
