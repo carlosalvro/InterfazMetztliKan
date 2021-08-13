@@ -14,7 +14,7 @@ import plotly.express as px
 import os
 import functions
 
-PATH_IMGS = r'../Imagenes'
+PATH_IMGS = r'./Imagenes'
 IMGS = os.listdir(PATH_IMGS)
 IMGS_PATH = [os.path.join(PATH_IMGS,i) for i in IMGS ]
 min_default = [0,0,0]
