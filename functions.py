@@ -7,7 +7,7 @@ import os
 import plotly.express as px
 import serial
 import json
-
+import re
 
 
 
@@ -144,12 +144,29 @@ def gaussian_blur(file):
   return filtro  
 
 
+
+
+# def serial_cleaner():
+#   ### ESTA FUNCIÓN CONVIERTE LO QUE RECIBE DEL PUERTO SERIAL 
+#   ### A UN DICCIONARIO EN PYTHON 
+#   ### SE ESPERA QUE DEL PUERTO SE RECIBA ALGO ASI 
+#   ### ["Al":"201", "La":"119", "Lo":"72", "Te":"15", "Pr":"2", "Hu":"2","Ax":"-2","Ay":"319","Az":"219","Gx":"-136","Gy":"105","Gz":"-349"]
+#   ### NO IMPORTA EL ORDEN SOLO LA ESTRUCTURA
+#   prueba = """["Al":"201", "La":"119", "Lo":"72", "Te":"15", "Pr":"2", "Hu":"2","Ax":"-2","Ay":"319","Az":"219","Gx":"-136","Gy":"105","Gz":"-349"]"""
+#   pattern = r"[\[\{](.+)[\]\}]"
+#   return re.match(pattern, prueba).group(1)
+
+
 def open_serial():
-  ser = serial.Serial('/dev/pts/5')
+  ser = serial.Serial('/dev/pts/5', baudrate=115200) ## aqui cambiar el puerto
   decode_data = ser.readline().decode('utf-8')
+  try:
+    #POR SI LA CADENA VIENE CON CORCHETES Y NO CON LLAVES
+    decode_data = decode_data.replace("[","{").replace("]","}")
+  except:
+    pass
   dic = json.loads(decode_data)
   output = [
-    dic['Al'],
     dic['Al'],
     dic['La'],
     dic['Lo'],

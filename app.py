@@ -8,7 +8,7 @@ import functions
 PATH_IMGS = r'../Imagenes'
 IMGS = os.listdir(PATH_IMGS)
 IMGS_PATH = [os.path.join(PATH_IMGS,i) for i in IMGS ]
-### DEFINIMOS LOS LIMOTES DE HSV respectivamente ##################3
+### DEFINIMOS LOS LIMITES DE HSV respectivamente ##################3
 min_default = [0,0,0]
 max_default = [180,255,255]
 
@@ -32,7 +32,6 @@ app.layout= html.Div(
       children=[
         # iniciamos componente de los tabs (las pestañas para cambiar de métrica a imagen)
         dcc.Tabs(className='main-tabs',
-                #  vertical=True,
                   value='tab-metrica',children=[
           # iniciamos el primer tab de metrica
           dcc.Tab(id='tab-metrica',
@@ -50,7 +49,6 @@ app.layout= html.Div(
                         n_intervals=0
                     ),
                     # aqui comienza el contenedor de metricas
-                    # IMAGEN
                     html.Div(
                       className='tab-section',
                       children=[
@@ -60,7 +58,7 @@ app.layout= html.Div(
                         html.Div(
                           className='principal-metrica',
                           children=[
-                            #CONTENEDOR GRÁFICA
+                            # Sección ALTITUD
                             html.Div(
                               className="card-1 altitud",
                               children = [
@@ -69,6 +67,7 @@ app.layout= html.Div(
                                 html.P("metros")
                               ]
                             ),
+                            # Sección COORDENADAS
                             html.Div(
                               className=("card-2 coordenadas"),
                               children = [
@@ -89,6 +88,7 @@ app.layout= html.Div(
                                 )
                               ]
                             ),
+                            # Sección TEMPERATURA
                             html.Div(
                               className="card-1 temperatura",
                               children = [
@@ -97,6 +97,7 @@ app.layout= html.Div(
                                 html.P("°C")
                               ]
                             ),
+                            # Sección PRESION
                             html.Div(
                               className="card-1 presión",
                               children = [
@@ -105,6 +106,7 @@ app.layout= html.Div(
                                 html.P("Pa")
                               ]
                             ),
+                            # Sección HUMEDAD
                             html.Div(
                               className="card-1 humedad",
                               children = [
@@ -112,6 +114,7 @@ app.layout= html.Div(
                                 html.H3(id='humedad', children="3"),
                               ]
                             ),
+                            # Sección ACELEROMETRO
                             html.Div(
                               className=("card-3 acelerometro"),
                               children = [
@@ -134,6 +137,7 @@ app.layout= html.Div(
                                 )
                               ]
                             ),
+                            # Sección GIROSCOPIO
                             html.Div(
                               className=("card-3 giroscopio"),
                               children = [
@@ -156,6 +160,7 @@ app.layout= html.Div(
                                 )
                               ]
                             ),
+                            # Sección VELOCIDAD
                             html.Div(
                               className="card-1 velocidad",
                               children = [
@@ -164,6 +169,7 @@ app.layout= html.Div(
                                 html.P("m/s")
                               ]
                             ),
+                            # Sección FECHA
                             html.Div(
                               className="card-1 fecha",
                               children = [
@@ -171,6 +177,7 @@ app.layout= html.Div(
                                 html.H4("Bateria"),
                               ]
                             ),
+                            # Sección GRAFICA
                             html.Div(
                               className="card-graph",
                               children= [
@@ -219,23 +226,28 @@ app.layout= html.Div(
                       ]
                     )
                   ]),
+          #contenido del segundo tab de imagen 
           dcc.Tab(id='tab-image',
                   className='custom-tab', 
                   selected_className='custom-tab--selected',
                   label='Imagen', 
                   value='tab-image', children=[
                     ###Contenido del segundo tab
-                  
+                    ## IMAGEN
                     html.Div(
                       className='tab-section',
                       children=[
+                        # TITULO
                         html.H2('Imagen'),
+                        # CONTENEDOR PRINCIPAL
                         html.Div(
                           className='principal-image',
                           children=[
+                            #CONTENEDOR GRAFICA
                             html.Div(
                               className='graph-container',
                               children=[
+                                # GRAFICA
                                 html.Div(
                                   className= "image-container",
                                   id= "imagen-cansat",
@@ -246,15 +258,18 @@ app.layout= html.Div(
                                     ),
                                   ]
                                 ),
+                                # CONTENEDOR BOTONES GRAFICA
                                 html.Div(
                                   className='graph-buttons',
                                   children=[
+                                    # BOTON ATRAS
                                     html.Button(
                                       'Atras',
                                       id='boton-atras',
                                       n_clicks=0,
                                       n_clicks_timestamp=-1
                                     ),
+                                    # BOTON ADELANTE
                                     html.Button(
                                       'Adelante',
                                       id='boton-adelante',
@@ -265,9 +280,11 @@ app.layout= html.Div(
                                 )
                               ]
                             ),
+                            # CONTENEDOR CONTROLADORES
                             html.Div(
                               className="controls-container",
                               children=[
+                                #SLIDERS
                                 html.Div(className='sliders', children=[
                                   html.H3('Hue'),
                                   dcc.RangeSlider(
@@ -303,6 +320,7 @@ app.layout= html.Div(
                                     updatemode='drag'
                                   )
                                 ]),
+                                # BLURS
                                 html.H3("Desenfoques"),
                                 html.Div(className ='blur-buttons', 
                                   children=[
@@ -319,6 +337,7 @@ app.layout= html.Div(
                                       n_clicks_timestamp=-1
                                     )
                                 ]),
+                                # RESET BUTTON
                                 html.Button(
                                     'Reset',
                                     id='reset',
@@ -338,6 +357,10 @@ app.layout= html.Div(
   ]
 )
 
+## ESTA ES LA FUNCIÓN QUE ACTUALIZA LOS VALORES
+## RECIBE AL CONTADOR LLAMADO INTERVAL DE LA LINEA 47
+## EL CONTADOR LE DA LA SEÑAL PARA QUE LOS OUTPUTS SE REFRESQUEN
+## EL INTERVAL TIENE UN TIEMPO DE ACTUALIZACION DE 0.5 SEGUNDOS O 500 MILISEGUNDOS
 @app.callback(
   dash.dependencies.Output('altitud', 'children'),
   dash.dependencies.Output('latitud', 'children'),
@@ -354,7 +377,7 @@ app.layout= html.Div(
   [dash.dependencies.Input('interval-component', 'n_intervals')] 
 )
 def data_listener(n):
-  output = functions.open_serial()
+  output = functions.open_serial() # ESTA FUNCIÓN TRAE LOS VALORES DEL PUERTO SERIAL
   al = output[0]
   la = output[1]
   lo = output[2]
@@ -370,6 +393,12 @@ def data_listener(n):
   return al, la, lo, te, pr, hu, ax, ay, az, gx, gy, gz
 
 
+
+## ESTA FUNCIÓN ES LA RESPONSABLE DE LA INTERACCIÓN CON LA IMAGEN 
+## ESTA EN CAMBIO SOLO TIENE 1 OUTPUT QUE ES LA IMAGEN A LA QUE SE LE 
+## PUEDEN MOVER LOS VALORES DE hsv O LOS blurs 
+## LO QUE HACE QUE SE ACTUALICE ES EL CAMBIO EN LO INPUTS
+## QUE EN ESTE CASO SON LOS SLIDERS Y LOS BOTONES
 gau = 0
 med = 0
 res = 0
