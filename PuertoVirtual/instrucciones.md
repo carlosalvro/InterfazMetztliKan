@@ -6,9 +6,12 @@
 `$ socat -d -d pty,raw,echo=0,b115200 pty,raw,echo=0,b115200`
 
 - Y se tiene que obtener algo como esto 
-`2021/08/17 21:31:56 socat[8895] N PTY is /dev/pts/3`
-`2021/08/17 21:31:56 socat[8895] N PTY is /dev/pts/4`
-`2021/08/17 21:31:56 socat[8895] N starting data transfer loop with FDs [5,5] and [7,7]`
+```shell
+$ socat -d -d pty,raw,echo=0,b115200 pty,raw,echo=0,b115200
+2021/08/17 21:31:56 socat[8895] N PTY is /dev/pts/3
+2021/08/17 21:31:56 socat[8895] N PTY is /dev/pts/4
+2021/08/17 21:31:56 socat[8895] N starting data transfer loop with FDs [5,5] and [7,7]
+```
 
 ## Para probar que si funciona 
 En otra terminal ponemos 
@@ -20,3 +23,8 @@ En otra terminal ponemos
 ## Probar con archivo generador de numeros random
 Igual que en el anterior abrimos una terminal y vemos lo que se manda a 4 con `cat`
 y corremos el archivo `señal.py`
+
+
+# Para probar la interfaz
+- Checar que efectivamente `señal.py` este mandando datos 
+- Checar que los puertos coincidan, que sean los mismos en la función `open_serial` en el archivo de functions.py, el default es el 5.
