@@ -1,3 +1,4 @@
+# Codigo de jesus
 def CORTAR_JSON(cadena):
   """
   Toma una cadena string y busca y corta fracciones de mensaje JSON

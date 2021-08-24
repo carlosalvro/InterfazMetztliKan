@@ -172,8 +172,8 @@ app.layout= html.Div(
                             html.Div(
                               className="card-1 fecha",
                               children = [
-                                html.H4("Fecha"),
-                                html.H4("Bateria"),
+                                html.H4(id="date", children="20-08-2021"),
+                                html.H4(id="hour", children="17:43"),
                               ]
                             ),
                             # Sección GRAFICA
@@ -373,6 +373,8 @@ app.layout= html.Div(
   dash.dependencies.Output('giroX', 'children'),
   dash.dependencies.Output('giroY', 'children'),
   dash.dependencies.Output('giroZ', 'children'),
+  dash.dependencies.Output('date', 'children'),
+  dash.dependencies.Output('hour', 'children'),
   [dash.dependencies.Input('interval-component', 'n_intervals')] 
 )
 def data_listener(n):
@@ -389,7 +391,9 @@ def data_listener(n):
   gx = output[9]
   gy = output[10]
   gz = output[11]
-  return al, la, lo, te, pr, hu, ax, ay, az, gx, gy, gz
+  date = functions.today_date()
+  hour = functions.current_time()
+  return al, la, lo, te, pr, hu, ax, ay, az, gx, gy, gz, date, hour
 
 
 

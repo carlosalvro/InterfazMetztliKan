@@ -8,6 +8,7 @@ import plotly.express as px
 import serial
 import json
 import re
+from datetime import date, datetime
 
 
 
@@ -158,7 +159,7 @@ def gaussian_blur(file):
 
 
 def open_serial():
-  ser = serial.Serial('/dev/pts/5', baudrate=115200) ## aqui cambiar el puerto
+  ser = serial.Serial('/dev/pts/4', baudrate=115200) ## aqui cambiar el puerto
   decode_data = ser.readline().decode('utf-8')
   try:
     #POR SI LA CADENA VIENE CON CORCHETES Y NO CON LLAVES
@@ -181,3 +182,13 @@ def open_serial():
     dic['Gz'],
   ]
   return output
+
+
+
+def today_date():
+  today = date.today()
+  return today.strftime("%d/%m/%Y")
+
+def current_time():
+  now = datetime.now()
+  return now.strftime("%H:%M")

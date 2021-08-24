@@ -20,6 +20,7 @@ body {
   background: linear-gradient(180deg, var(--dark) 0%, var(--regular) 100%);
   background-size: cover;
   background-repeat: no-repeat;
+  height: 100vh;
 }
 .header {
   display: flex;
