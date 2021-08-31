@@ -19,6 +19,7 @@ app.layout= html.Div(
   #CONTENEDOR PRINCIPAL
   className="main-container",
   children=[
+    html.P(id="hidden-p", style={'display': 'none'}),
     # CABEZERA DONDE VA EL LOGO
     html.Div(
       className='header', children=[
@@ -57,9 +58,25 @@ app.layout= html.Div(
                         html.Div(
                           className='principal-metrica',
                           children=[
+                            #Botones
+                            html.Div(
+                              className="buttons",
+                              children = [
+                                html.Button('Iniciar', className='start-button', id='start-button'),
+                                html.Button('Detener', className='stop-button', id='stop-button')
+                              ]
+                            ),
+                            # tiempo de mision
+                            html.Div(
+                              className="card time",
+                              children = [
+                                html.H4("Tiempo de Misión"),
+                                html.H3(id='mision-time' ,children="00:00"),
+                              ]
+                            ),
                             # Sección ALTITUD
                             html.Div(
-                              className="card-1 altitud",
+                              className="card altitud",
                               children = [
                                 html.H4("Altitud"),
                                 html.H3(id='altitud', children="120"),
@@ -68,28 +85,28 @@ app.layout= html.Div(
                             ),
                             # Sección COORDENADAS
                             html.Div(
-                              className=("card-2 coordenadas"),
+                              className=("v-card coordenadas"),
                               children = [
                                 html.H4("Coordenadas"),
                                 html.Div(
-                                  className="subcard-2 values-2",
+                                  className="v-subcard",
                                   children = [
-                                    html.H3(id='latitud', children="128.5"),
-                                    html.H3(id='longitud', children="-103.9")
+                                    html.H3(id='longitud', children="-103.9"),
+                                    html.P("Longitud")
                                   ]
                                 ),
                                 html.Div(
-                                  className= "subcard-2 uds",
+                                  className= "v-subcard",
                                   children = [
-                                    html.P("Latitud"),
-                                    html.P("Longitud")
+                                    html.H3(id='latitud', children="128.5"),
+                                    html.P("Latitud")
                                   ]
                                 )
                               ]
                             ),
                             # Sección TEMPERATURA
                             html.Div(
-                              className="card-1 temperatura",
+                              className="card temperatura",
                               children = [
                                 html.H4("Temperatura"),
                                 html.H3(id='temperatura', children="30"),
@@ -98,7 +115,7 @@ app.layout= html.Div(
                             ),
                             # Sección PRESION
                             html.Div(
-                              className="card-1 presión",
+                              className="card presión",
                               children = [
                                 html.H4("Presión"),
                                 html.H3(id ='presion', children="2"),
@@ -107,7 +124,7 @@ app.layout= html.Div(
                             ),
                             # Sección HUMEDAD
                             html.Div(
-                              className="card-1 humedad",
+                              className="card humedad",
                               children = [
                                 html.H4("Humedad"),
                                 html.H3(id='humedad', children="3"),
@@ -115,11 +132,11 @@ app.layout= html.Div(
                             ),
                             # Sección ACELEROMETRO
                             html.Div(
-                              className=("card-3 acelerometro"),
+                              className=("card acelerometro"),
                               children = [
                                 html.H4("Acelerometro"),
                                 html.Div(
-                                  className="subcard-3 values-3",
+                                  className="subcard",
                                   children = [
                                     html.H3(id ='aceleX', children="128.5"),
                                     html.H3(id ='aceleY', children="-103.9"),
@@ -127,7 +144,7 @@ app.layout= html.Div(
                                   ]
                                 ),
                                 html.Div(
-                                  className= "subcard-3 uds",
+                                  className= "subcard",
                                   children = [
                                     html.P("Eje X"),
                                     html.P("Eje Y"),
@@ -138,11 +155,11 @@ app.layout= html.Div(
                             ),
                             # Sección GIROSCOPIO
                             html.Div(
-                              className=("card-3 giroscopio"),
+                              className=("card giroscopio"),
                               children = [
                                 html.H4("Giroscopio"),
                                 html.Div(
-                                  className="subcard-3 values-3",
+                                  className="subcard",
                                   children = [
                                     html.H3(id ='giroX', children="128.5"),
                                     html.H3(id ='giroY', children="-103.9"),
@@ -150,7 +167,7 @@ app.layout= html.Div(
                                   ]
                                 ),
                                 html.Div(
-                                  className= "subcard-3 uds",
+                                  className= "subcard",
                                   children = [
                                     html.P("Eje X"),
                                     html.P("Eje Y"),
@@ -161,7 +178,7 @@ app.layout= html.Div(
                             ),
                             # Sección VELOCIDAD
                             html.Div(
-                              className="card-1 velocidad",
+                              className="card velocidad",
                               children = [
                                 html.H4("Velocidad"),
                                 html.H3("30"),
@@ -170,7 +187,7 @@ app.layout= html.Div(
                             ),
                             # Sección FECHA
                             html.Div(
-                              className="card-1 fecha",
+                              className="card fecha",
                               children = [
                                 html.H4(id="date", children="20-08-2021"),
                                 html.H4(id="hour", children="17:43"),
@@ -193,7 +210,9 @@ app.layout= html.Div(
                                         html.Div(
                                           className="graph-ace-giro-container",
                                           children=[
+                                            dcc.Store(id='graphs-store'),
                                             dcc.Graph(
+                                              id='acel-gyro-graph',
                                               figure=functions.plot_graphs_ace_giro()
                                             )
                                           ]
@@ -356,6 +375,38 @@ app.layout= html.Div(
   ]
 )
 
+active = False
+@app.callback(
+  dash.dependencies.Output('hidden-p', 'children'),
+  [dash.dependencies.Input('start-button', 'n_clicks'),
+  dash.dependencies.Input('stop-button', 'n_clicks')]
+)
+def mision_starter_stopper(start, stop):
+  global active
+  
+  ctx = dash.callback_context
+
+  if not ctx.triggered:
+    raise dash.exceptions.PreventUpdate
+  else:
+    clicked_button = ctx.triggered[0]['prop_id'].split('.')[0] .split('-')[0]
+  
+  if clicked_button=="start":
+    print("Se presiono start")
+    if active == False:
+      active = True
+    else:
+      raise dash.exceptions.PreventUpdate
+
+  elif clicked_button=="stop":
+    print("Se presiono stop")
+    if active == True:
+      active = False
+    else: 
+      raise dash.exceptions.PreventUpdate
+  return None
+
+dic = {"A":[], "G": []}
 ## ESTA ES LA FUNCIÓN QUE ACTUALIZA LOS VALORES
 ## RECIBE AL CONTADOR LLAMADO INTERVAL DE LA LINEA 47
 ## EL CONTADOR LE DA LA SEÑAL PARA QUE LOS OUTPUTS SE REFRESQUEN
@@ -375,25 +426,56 @@ app.layout= html.Div(
   dash.dependencies.Output('giroZ', 'children'),
   dash.dependencies.Output('date', 'children'),
   dash.dependencies.Output('hour', 'children'),
+  dash.dependencies.Output('acel-gyro-graph','figure'),
   [dash.dependencies.Input('interval-component', 'n_intervals')] 
 )
 def data_listener(n):
-  output = functions.open_serial() # ESTA FUNCIÓN TRAE LOS VALORES DEL PUERTO SERIAL
-  al = output[0]
-  la = output[1]
-  lo = output[2]
-  te = output[3]
-  pr = output[4]
-  hu = output[5]
-  ax = output[6]
-  ay = output[7]
-  az = output[8]
-  gx = output[9]
-  gy = output[10]
-  gz = output[11]
+  global dic, active
+
+  if active == False:
+    raise dash.exceptions.PreventUpdate
+  else:
+    pass
+
+  output = functions.open_serial(3) # ESTA FUNCIÓN TRAE LOS VALORES DEL PUERTO SERIAL Cambiar puerto si es necesario
+
+  if output == None:
+    raise dash.exceptions.PreventUpdate
+  else: 
+    pass
+
+  al = output['Al']
+  la = output['La']
+  lo = output['Lo']
+  te = output['Te']
+  pr = output['Pr']
+  hu = output['Hu']
+  ax = output['Ax']
+  ay = output['Ay']
+  az = output['Az']
+  gx = output['Gx']
+  gy = output['Gy']
+  gz = output['Gz']
+
   date = functions.today_date()
   hour = functions.current_time()
-  return al, la, lo, te, pr, hu, ax, ay, az, gx, gy, gz, date, hour
+
+  g,a = functions.graphs_values(output)
+  dic['A'].append(a)
+  dic['G'].append(g)
+  graph_giro_ace = functions.plot_graphs_ace_giro(dic)
+
+  return al, la, lo, te, pr, hu, ax, ay, az, gx, gy, gz, date, hour, graph_giro_ace
+
+
+# @app.callback(
+#   dash.dependencies.Output('acel-gyro-graph', 'figure'),
+#   [dash.dependencies.Input('graphs-store', 'data')]
+# )
+# def giro_acel_graph(data):
+#   # return functions.plot_graphs_ace_giro(data )
+#     print(data)
+
 
 
 

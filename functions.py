@@ -17,10 +17,16 @@ from datetime import date, datetime
 ################################################
 
 ## Grafica de lineas acelerometro y giroscopio
-def plot_graphs_ace_giro():
-  x = [i for i in range(1,51)]
-  y1 = np.random.randint(-100,100,50)
-  y2 = np.random.randint(-100,100,50)
+def plot_graphs_ace_giro(dic = None):
+  if dic == None:
+    x = [i for i in range(1,51)]
+    y1 = np.random.randint(-100,100,50)
+    y2 = np.random.randint(-100,100,50)
+  else:
+    y1 = dic['A']
+    y2 = dic['G']
+    x = [i for i in range(len(y1))] 
+
   fig = make_subplots(rows=2, cols=1)
 
   fig.append_trace(go.Scatter(x=x, y=y1, line=dict(color='#F24333')), row=1, col=1)
@@ -158,31 +164,24 @@ def gaussian_blur(file):
 #   return re.match(pattern, prueba).group(1)
 
 
-def open_serial():
-  ser = serial.Serial('/dev/pts/4', baudrate=115200) ## aqui cambiar el puerto
+def open_serial(port):
+  complete_port = '/dev/pts/'+ str(port) 
+  ser = serial.Serial(complete_port, baudrate=115200) 
   decode_data = ser.readline().decode('utf-8')
-  try:
-    #POR SI LA CADENA VIENE CON CORCHETES Y NO CON LLAVES
-    decode_data = decode_data.replace("[","{").replace("]","}")
-  except:
-    pass
-  dic = json.loads(decode_data)
-  output = [
-    dic['Al'],
-    dic['La'],
-    dic['Lo'],
-    dic['Te'],
-    dic['Pr'],
-    dic['Hu'],
-    dic['Ax'],
-    dic['Ay'],
-    dic['Az'],
-    dic['Gx'],
-    dic['Gy'],
-    dic['Gz'],
-  ]
-  return output
 
+  cadena = re.match(r'(\{.+\})', decode_data)
+
+  if cadena != None:
+    try:
+      output = json.loads(cadena.group(1))  
+      return output  
+    except Exception as e :
+      print(e)
+      print(cadena.group(1))
+      print('---------------')
+  else:
+    return None
+    
 
 
 def today_date():
@@ -192,3 +191,17 @@ def today_date():
 def current_time():
   now = datetime.now()
   return now.strftime("%H:%M")
+
+
+def graphs_values(output):
+  ax = float(output['Ax'])
+  ay = float(output['Ay'])
+  az = float(output['Az'])
+  gx = float(output['Gx'])
+  gy = float(output['Gy'])
+  gz = float(output['Gz'])
+
+  g = np.linalg.norm(np.array([gx,gy,gz]))
+  a = np.linalg.norm(np.array([ax,ay,az]))
+
+  return g,a
