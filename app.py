@@ -3,6 +3,7 @@ import dash_core_components as dcc
 import dash_html_components as html
 import os
 import functions
+import time
 
 PATH_IMGS = r'./Imagenes'
 IMGS = os.listdir(PATH_IMGS)
@@ -79,7 +80,7 @@ app.layout= html.Div(
                               className="card altitud",
                               children = [
                                 html.H4("Altitud"),
-                                html.H3(id='altitud', children="120"),
+                                html.H3(id='altitud', children="0"),
                                 html.P("metros")
                               ]
                             ),
@@ -91,14 +92,14 @@ app.layout= html.Div(
                                 html.Div(
                                   className="v-subcard",
                                   children = [
-                                    html.H3(id='longitud', children="-103.9"),
+                                    html.H3(id='longitud', children="0"),
                                     html.P("Longitud")
                                   ]
                                 ),
                                 html.Div(
                                   className= "v-subcard",
                                   children = [
-                                    html.H3(id='latitud', children="128.5"),
+                                    html.H3(id='latitud', children="0"),
                                     html.P("Latitud")
                                   ]
                                 )
@@ -109,7 +110,7 @@ app.layout= html.Div(
                               className="card temperatura",
                               children = [
                                 html.H4("Temperatura"),
-                                html.H3(id='temperatura', children="30"),
+                                html.H3(id='temperatura', children="0"),
                                 html.P("°C")
                               ]
                             ),
@@ -118,7 +119,7 @@ app.layout= html.Div(
                               className="card presión",
                               children = [
                                 html.H4("Presión"),
-                                html.H3(id ='presion', children="2"),
+                                html.H3(id ='presion', children="0"),
                                 html.P("Pa")
                               ]
                             ),
@@ -127,7 +128,7 @@ app.layout= html.Div(
                               className="card humedad",
                               children = [
                                 html.H4("Humedad"),
-                                html.H3(id='humedad', children="3"),
+                                html.H3(id='humedad', children="0"),
                               ]
                             ),
                             # Sección ACELEROMETRO
@@ -138,9 +139,9 @@ app.layout= html.Div(
                                 html.Div(
                                   className="subcard",
                                   children = [
-                                    html.H3(id ='aceleX', children="128.5"),
-                                    html.H3(id ='aceleY', children="-103.9"),
-                                    html.H3(id ='aceleZ', children="150.0")
+                                    html.H3(id ='aceleX', children="0"),
+                                    html.H3(id ='aceleY', children="0"),
+                                    html.H3(id ='aceleZ', children="0")
                                   ]
                                 ),
                                 html.Div(
@@ -161,9 +162,9 @@ app.layout= html.Div(
                                 html.Div(
                                   className="subcard",
                                   children = [
-                                    html.H3(id ='giroX', children="128.5"),
-                                    html.H3(id ='giroY', children="-103.9"),
-                                    html.H3(id ='giroZ', children="150.0")
+                                    html.H3(id ='giroX', children="0"),
+                                    html.H3(id ='giroY', children="0"),
+                                    html.H3(id ='giroZ', children="0")
                                   ]
                                 ),
                                 html.Div(
@@ -181,7 +182,7 @@ app.layout= html.Div(
                               className="card velocidad",
                               children = [
                                 html.H4("Velocidad"),
-                                html.H3("30"),
+                                html.H3("0"),
                                 html.P("m/s")
                               ]
                             ),
@@ -376,13 +377,14 @@ app.layout= html.Div(
 )
 
 active = False
+dic = {"A":[], "G": []}
 @app.callback(
   dash.dependencies.Output('hidden-p', 'children'),
   [dash.dependencies.Input('start-button', 'n_clicks'),
   dash.dependencies.Input('stop-button', 'n_clicks')]
 )
 def mision_starter_stopper(start, stop):
-  global active
+  global active, dic, time_starter
   
   ctx = dash.callback_context
 
@@ -394,6 +396,8 @@ def mision_starter_stopper(start, stop):
   if clicked_button=="start":
     print("Se presiono start")
     if active == False:
+      time_starter = time.time()
+      dic = {"A":[], "G": []}
       active = True
     else:
       raise dash.exceptions.PreventUpdate
@@ -406,7 +410,6 @@ def mision_starter_stopper(start, stop):
       raise dash.exceptions.PreventUpdate
   return None
 
-dic = {"A":[], "G": []}
 ## ESTA ES LA FUNCIÓN QUE ACTUALIZA LOS VALORES
 ## RECIBE AL CONTADOR LLAMADO INTERVAL DE LA LINEA 47
 ## EL CONTADOR LE DA LA SEÑAL PARA QUE LOS OUTPUTS SE REFRESQUEN
@@ -427,45 +430,66 @@ dic = {"A":[], "G": []}
   dash.dependencies.Output('date', 'children'),
   dash.dependencies.Output('hour', 'children'),
   dash.dependencies.Output('acel-gyro-graph','figure'),
+  dash.dependencies.Output('mision-time', 'children'),
   [dash.dependencies.Input('interval-component', 'n_intervals')] 
 )
 def data_listener(n):
-  global dic, active
+  global dic, active, time_starter
 
   if active == False:
     raise dash.exceptions.PreventUpdate
-  else:
-    pass
 
-  output = functions.open_serial(3) # ESTA FUNCIÓN TRAE LOS VALORES DEL PUERTO SERIAL Cambiar puerto si es necesario
+  try:
+    output = functions.open_serial(4) # ESTA FUNCIÓN TRAE LOS VALORES DEL PUERTO SERIAL Cambiar puerto si es necesario
+  except:
+    print("Error al conectar con puerto serial")
 
   if output == None:
-    raise dash.exceptions.PreventUpdate
+    al = dash.no_update
+    la = dash.no_update
+    lo = dash.no_update
+    te = dash.no_update
+    pr = dash.no_update
+    hu = dash.no_update
+    ax = dash.no_update
+    ay = dash.no_update
+    az = dash.no_update
+    gx = dash.no_update
+    gy = dash.no_update
+    gz = dash.no_update
+    graph_giro_ace = dash.no_update
   else: 
-    pass
+    al = output['Al']
+    la = output['La']
+    lo = output['Lo']
+    te = output['Te']
+    pr = output['Pr']
+    hu = output['Hu']
+    ax = output['Ax']
+    ay = output['Ay']
+    az = output['Az']
+    gx = output['Gx']
+    gy = output['Gy']
+    gz = output['Gz']
 
-  al = output['Al']
-  la = output['La']
-  lo = output['Lo']
-  te = output['Te']
-  pr = output['Pr']
-  hu = output['Hu']
-  ax = output['Ax']
-  ay = output['Ay']
-  az = output['Az']
-  gx = output['Gx']
-  gy = output['Gy']
-  gz = output['Gz']
+    g,a = functions.graphs_values(output)
+    dic['A'].append(a)
+    dic['G'].append(g)
+    graph_giro_ace = functions.plot_graphs_ace_giro(dic)
 
-  date = functions.today_date()
-  hour = functions.current_time()
 
-  g,a = functions.graphs_values(output)
-  dic['A'].append(a)
-  dic['G'].append(g)
-  graph_giro_ace = functions.plot_graphs_ace_giro(dic)
+  if n%2 != 1:
+    mision_time = dash.no_update
+    hour = dash.no_update
+  else:
+    hour = functions.current_time() 
+    mision_time = functions.get_time_mision(time_starter)
 
-  return al, la, lo, te, pr, hu, ax, ay, az, gx, gy, gz, date, hour, graph_giro_ace
+  if n ==1 :
+    date = functions.today_date()
+  else:
+    date = dash.no_update
+  return al, la, lo, te, pr, hu, ax, ay, az, gx, gy, gz, date, hour, graph_giro_ace, mision_time
 
 
 # @app.callback(

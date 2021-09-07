@@ -8,7 +8,8 @@ import plotly.express as px
 import serial
 import json
 import re
-from datetime import date, datetime
+from datetime import date, datetime, timedelta
+import time
 
 
 
@@ -19,9 +20,12 @@ from datetime import date, datetime
 ## Grafica de lineas acelerometro y giroscopio
 def plot_graphs_ace_giro(dic = None):
   if dic == None:
-    x = [i for i in range(1,51)]
-    y1 = np.random.randint(-100,100,50)
-    y2 = np.random.randint(-100,100,50)
+    # x = [i for i in range(1,51)]
+    x = [0]
+    # y1 = np.random.randint(-100,100,50)
+    y1 = [0]
+    # y2 = np.random.randint(-100,100,50)
+    y2 = [0]
   else:
     y1 = dic['A']
     y2 = dic['G']
@@ -205,3 +209,11 @@ def graphs_values(output):
   a = np.linalg.norm(np.array([ax,ay,az]))
 
   return g,a
+
+def get_time_mision(starter_time):
+  now_time = time.time()
+  secs = int(now_time - starter_time)
+  sec2time = timedelta(seconds=secs)
+  timer = (datetime.min  + sec2time).time()
+  timer = timer.strftime("%M:%S")
+  return timer
