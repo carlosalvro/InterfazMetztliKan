@@ -2,6 +2,8 @@ import dash
 import dash_core_components as dcc
 import dash_html_components as html
 import os
+
+from dash_html_components.Section import Section
 import functions
 import time
 
@@ -188,10 +190,37 @@ app.layout= html.Div(
                             ),
                             # Sección FECHA
                             html.Div(
-                              className="card fecha",
+                              className="fecha-bat",
                               children = [
-                                html.H4(id="date", children="20-08-2021"),
-                                html.H4(id="hour", children="17:43"),
+                                # Aca va la pila
+                                html.Section(
+                                  className="pila",
+                                  children= [
+                                    html.Div(className="pila-head"), 
+                                    html.Div(
+                                      className="pila-body", 
+                                      children= [
+                                        html.Div(
+                                          className="pila-fondo",
+                                          children=[
+                                            html.Div(
+                                              className="pila-pila",
+                                            )
+                                          ]
+                                        ),
+                                        html.H5(id="battery-percent", children=["100%"])
+                                      ]
+                                    )
+                                  ]
+                                ),
+                                # Aca va la fecha
+                                html.Section(
+                                  className="card fecha", 
+                                  children = [
+                                    html.H4(id="date", children="20-08-2021"),
+                                    html.H4(id="hour", children="17:43"),
+                                  ]
+                                ),
                               ]
                             ),
                             # Sección GRAFICA
