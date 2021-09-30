@@ -59,6 +59,7 @@ p {
 .header {
   display: flex;
   justify-content: center;
+  margin-bottom: 20px;
 }
 .header .logo {
   width: 250px;
@@ -304,6 +305,7 @@ h5 {
   text-align: center;
   position: absolute;
   z-index: 3;
+  bottom: 45%;
 }
 .fecha {
   width: 70%;
@@ -355,6 +357,10 @@ h5 {
   display: flex;
   justify-content: center;
   flex-direction: column;
+}
+.image-container p {
+  color: white;
+  text-align: center;
 }
 .controls-container {
   width: 40%;

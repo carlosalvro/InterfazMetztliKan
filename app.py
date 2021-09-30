@@ -2,8 +2,8 @@ import dash
 import dash_core_components as dcc
 import dash_html_components as html
 import os
+import numpy as np
 
-from dash_html_components.Section import Section
 import functions
 import time
 
@@ -184,7 +184,7 @@ app.layout= html.Div(
                               className="card velocidad",
                               children = [
                                 html.H4("Velocidad"),
-                                html.H3("0"),
+                                html.H3(id = "velocidad", children="0"),
                                 html.P("m/s")
                               ]
                             ),
@@ -202,13 +202,14 @@ app.layout= html.Div(
                                       children= [
                                         html.Div(
                                           className="pila-fondo",
+                                          id="pila-porcentaje",
                                           children=[
                                             html.Div(
                                               className="pila-pila",
-                                            )
+                                            ),
+                                            html.H5(id="battery-percent", children=["100%"])
                                           ]
-                                        ),
-                                        html.H5(id="battery-percent", children=["100%"])
+                                        )
                                       ]
                                     )
                                   ]
@@ -240,7 +241,6 @@ app.layout= html.Div(
                                         html.Div(
                                           className="graph-ace-giro-container",
                                           children=[
-                                            dcc.Store(id='graphs-store'),
                                             dcc.Graph(
                                               id='acel-gyro-graph',
                                               figure=functions.plot_graphs_ace_giro()
@@ -407,6 +407,7 @@ app.layout= html.Div(
 
 active = False
 dic = {"A":[], "G": []}
+#Esta función nos da la orden para empezar a recibir datos
 @app.callback(
   dash.dependencies.Output('hidden-p', 'children'),
   [dash.dependencies.Input('start-button', 'n_clicks'),
@@ -456,10 +457,10 @@ def mision_starter_stopper(start, stop):
   dash.dependencies.Output('giroX', 'children'),
   dash.dependencies.Output('giroY', 'children'),
   dash.dependencies.Output('giroZ', 'children'),
-  dash.dependencies.Output('date', 'children'),
-  dash.dependencies.Output('hour', 'children'),
+  dash.dependencies.Output('velocidad', 'children'),
   dash.dependencies.Output('acel-gyro-graph','figure'),
   dash.dependencies.Output('mision-time', 'children'),
+  dash.dependencies.Output("pila-porcentaje", 'children'),
   [dash.dependencies.Input('interval-component', 'n_intervals')] 
 )
 def data_listener(n):
@@ -468,10 +469,11 @@ def data_listener(n):
   if active == False:
     raise dash.exceptions.PreventUpdate
 
-  try:
-    output = functions.open_serial(4) # ESTA FUNCIÓN TRAE LOS VALORES DEL PUERTO SERIAL Cambiar puerto si es necesario
-  except:
-    print("Error al conectar con puerto serial")
+  # try:
+  #   output = functions.open_serial(4) # ESTA FUNCIÓN TRAE LOS VALORES DEL PUERTO SERIAL Cambiar puerto si es necesario
+  # except:
+  #   print("Error al conectar con puerto serial")
+  output = functions.random_generator()
 
   if output == None:
     al = dash.no_update
@@ -500,6 +502,7 @@ def data_listener(n):
     gx = output['Gx']
     gy = output['Gy']
     gz = output['Gz']
+    ve = output['Ve']
 
     g,a = functions.graphs_values(output)
     dic['A'].append(a)
@@ -507,29 +510,53 @@ def data_listener(n):
     graph_giro_ace = functions.plot_graphs_ace_giro(dic)
 
 
-  if n%2 != 1:
+  # El tiempo de misión solo se actualizará cada segundo
+  if n%2 != 1: #Si no es un segundo exacto no te actualices
     mision_time = dash.no_update
+  else:
+    mision_time = functions.get_time_mision(time_starter)
+
+
+  pila_value =   np.random.randint(5,101)
+  pila_value_str = str(pila_value) + "%"
+  if pila_value < 20:
+    pila = [html.Div(
+              className="pila-pila",
+              style={'height': pila_value_str, "background-color": "#F95738"}
+            ),
+            html.H5(id="battery-percent", children=[pila_value_str])]
+  else:
+    pila = [html.Div(
+              className="pila-pila",
+              style={'height': pila_value_str, "background-color": "#55F165"}
+            ),
+            html.H5(id="battery-percent", children=[pila_value_str])]
+  
+  
+  return al, la, lo, te, pr, hu, ax, ay, az, gx, gy, gz, ve, graph_giro_ace, mision_time, pila
+
+@app.callback(
+  dash.dependencies.Output('date', 'children'),
+  dash.dependencies.Output('hour', 'children'),
+  [dash.dependencies.Input('interval-component', 'n_intervals')] 
+)
+def date_and_hour(n):
+  global active
+
+  if active == True:
+    raise dash.exceptions.PreventUpdate
+  # La hora y el tiempo de misión solo se actualizarán cada segundo
+  if n%2 != 1: #Si no es un segundo exacto no te actualices
     hour = dash.no_update
   else:
     hour = functions.current_time() 
-    mision_time = functions.get_time_mision(time_starter)
-
-  if n ==1 :
+  # La fecha solo se actualizará al iniciar el programa
+  if n ==0 : #Si el intervalo es 1 (acaba de arrancar) actualizate
     date = functions.today_date()
   else:
     date = dash.no_update
-  return al, la, lo, te, pr, hu, ax, ay, az, gx, gy, gz, date, hour, graph_giro_ace, mision_time
 
-
-# @app.callback(
-#   dash.dependencies.Output('acel-gyro-graph', 'figure'),
-#   [dash.dependencies.Input('graphs-store', 'data')]
-# )
-# def giro_acel_graph(data):
-#   # return functions.plot_graphs_ace_giro(data )
-#     print(data)
-
-
+  return date, hour
 
 
 ## ESTA FUNCIÓN ES LA RESPONSABLE DE LA INTERACCIÓN CON LA IMAGEN 

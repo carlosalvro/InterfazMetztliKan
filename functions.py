@@ -3,7 +3,6 @@ import numpy as np
 from plotly.subplots import make_subplots
 import plotly.graph_objects as go
 import cv2
-import os 
 import plotly.express as px
 import serial
 import json
@@ -19,12 +18,9 @@ import time
 
 ## Grafica de lineas acelerometro y giroscopio
 def plot_graphs_ace_giro(dic = None):
-  if dic == None:
-    # x = [i for i in range(1,51)]
+  if dic == None: #Si no se recibe nada que la gráficas muestren 0
     x = [0]
-    # y1 = np.random.randint(-100,100,50)
     y1 = [0]
-    # y2 = np.random.randint(-100,100,50)
     y2 = [0]
   else:
     y1 = dic['A']
@@ -187,16 +183,34 @@ def open_serial(port):
     return None
     
 
-
+def random_generator():
+  al = str(np.random.randint(0,401))
+  la = str(np.random.randint(0,401))
+  lo = str(np.random.randint(0,401))
+  te = str(np.random.randint(0,41))
+  pr = str(np.random.randint(0,3))
+  hu = str(np.random.randint(0,3))
+  ax = str(np.random.randint(-400,401))
+  ay = str(np.random.randint(-400,401))
+  az = str(np.random.randint(-400,401))
+  gx = str(np.random.randint(-400,401))
+  gy = str(np.random.randint(-400,401))
+  gz = str(np.random.randint(-400,401))
+  ve = str(np.random.randint(0,41))
+  dic = {'Al':al,'La':la,'Lo':lo,'Te':te,'Pr':pr,'Hu':hu,'Ax':ax,'Ay':ay,'Az':az,'Gx':gx,'Gy':gy,'Gz':gz, 'Ve':ve}
+  return dic
+#Obtiene la fecha de hoy en el formato determinado
 def today_date():
   today = date.today()
   return today.strftime("%d/%m/%Y")
 
+#Obtiene la hora actual en el formato determinado
 def current_time():
   now = datetime.now()
   return now.strftime("%H:%M")
 
 
+# Le saca la norma a los vectores aceleración y giroscopio
 def graphs_values(output):
   ax = float(output['Ax'])
   ay = float(output['Ay'])
@@ -207,9 +221,9 @@ def graphs_values(output):
 
   g = np.linalg.norm(np.array([gx,gy,gz]))
   a = np.linalg.norm(np.array([ax,ay,az]))
-
   return g,a
 
+#Contador tipo cronometro para contar el tiempo de misión transcurrido
 def get_time_mision(starter_time):
   now_time = time.time()
   secs = int(now_time - starter_time)
