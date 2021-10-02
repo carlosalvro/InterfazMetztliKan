@@ -52,6 +52,10 @@ p {
 
 
 .main-container {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   width: 100%;
   height: 100%;
 }
@@ -191,6 +195,7 @@ button {
   box-shadow: 0px 4px 0px #237B2D;
   width: 80px;
   height: 80px;
+  cursor: pointer;
 }
 .stop-button {
   background-color: var(--red);
@@ -202,6 +207,7 @@ button {
   box-shadow: 0px 4px 0px #9A3724;
   width: 80px;
   height: 80px;
+  cursor: pointer;
 }
 .stop-button:active {
   background-color: #9A3724;
@@ -448,5 +454,38 @@ h5 {
   margin: 0px 3px;
 }
 .graph-buttons button:active {
+  background-color: var(--dark);
+}
+
+.pop-up-container {
+  position: absolute;
+  visibility: hidden;
+  width: 50%;
+  border-radius: 25px;
+  height: 30%;
+  top: 100px;
+  z-index: 1000;
+  background-color: white;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-evenly;
+}
+.reporte-buttons-container {
+  display: flex;
+  flex-direction: row;
+  width: 60%;
+  height: 18%;
+  justify-content: space-between;
+}
+.reporte-buttons-container button {
+  background-color: var(--cards);
+  border-radius: 10px;
+  color: white;
+  width: 40%;
+  cursor: pointer;
+}
+
+.reporte-buttons-container button:active {
   background-color: var(--dark);
 }

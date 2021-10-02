@@ -197,7 +197,9 @@ def random_generator():
   gy = str(np.random.randint(-400,401))
   gz = str(np.random.randint(-400,401))
   ve = str(np.random.randint(0,41))
-  dic = {'Al':al,'La':la,'Lo':lo,'Te':te,'Pr':pr,'Hu':hu,'Ax':ax,'Ay':ay,'Az':az,'Gx':gx,'Gy':gy,'Gz':gz, 'Ve':ve}
+  bat = np.random.randint(1,101)
+
+  dic = {'Al':al,'La':la,'Lo':lo,'Te':te,'Pr':pr,'Hu':hu,'Ax':ax,'Ay':ay,'Az':az,'Gx':gx,'Gy':gy,'Gz':gz, 'Ve':ve, 'Bat':bat}
   return dic
 #Obtiene la fecha de hoy en el formato determinado
 def today_date():

@@ -1,6 +1,7 @@
 import dash
-import dash_core_components as dcc
-import dash_html_components as html
+from dash import dcc
+from dash import html
+from pkg_resources import set_extraction_path
 import os
 import numpy as np
 
@@ -22,7 +23,18 @@ app.layout= html.Div(
   #CONTENEDOR PRINCIPAL
   className="main-container",
   children=[
-    html.P(id="hidden-p", style={'display': 'none'}),
+    html.P("True",id="hidden-p", style={'display': 'none'}),
+    html.P("True",id="2hidden-p", style={'display': 'none'}),
+    html.Section(id="modal", className="pop-up-container", hidden=True,children=[
+      html.H4("¿Quieres guardar los datos?"),
+      html.Div(
+        className="reporte-buttons-container",
+        children=[
+        html.Button("Cerrar",id="cerrar-reporte", className="boton-cerrar-reporte"),
+        html.Button("Guardar",id="guardar-reporte", className="boton-guardar-reporte")
+        ]
+      )
+    ]),
     # CABEZERA DONDE VA EL LOGO
     html.Div(
       className='header', children=[
@@ -405,6 +417,8 @@ app.layout= html.Div(
   ]
 )
 
+
+
 active = False
 dic = {"A":[], "G": []}
 #Esta función nos da la orden para empezar a recibir datos
@@ -439,6 +453,27 @@ def mision_starter_stopper(start, stop):
     else: 
       raise dash.exceptions.PreventUpdate
   return None
+
+popup_active = False
+@app.callback(
+    dash.dependencies.Output("modal", "style"),
+    dash.dependencies.Output("2hidden-p", "children"),
+    [dash.dependencies.Input('stop-button', 'n_clicks'), 
+    dash.dependencies.Input("guardar-reporte", "n_clicks"),
+    dash.dependencies.Input("cerrar-reporte", "n_clicks"),],
+    [dash.dependencies.State("2hidden-p", "children")],
+)
+def toggle_modal(stop, guardar, cerrar, is_visible):
+  if is_visible=="True":
+    print('Esta abierto')
+    new_visibility = "False"
+    style={"visibility":"hidden"}
+  else:
+    print("Cerrado")
+    new_visibility = "True"
+    style={"visibility":"visible"}
+  
+  return style, new_visibility
 
 ## ESTA ES LA FUNCIÓN QUE ACTUALIZA LOS VALORES
 ## RECIBE AL CONTADOR LLAMADO INTERVAL DE LA LINEA 47
@@ -489,6 +524,7 @@ def data_listener(n):
     gy = dash.no_update
     gz = dash.no_update
     graph_giro_ace = dash.no_update
+    pila_value = 1000 
   else: 
     al = output['Al']
     la = output['La']
@@ -503,7 +539,8 @@ def data_listener(n):
     gy = output['Gy']
     gz = output['Gz']
     ve = output['Ve']
-
+    pila_value = output['Bat']  
+    pila_value_str = str(pila_value) + "%"
     g,a = functions.graphs_values(output)
     dic['A'].append(a)
     dic['G'].append(g)
@@ -517,9 +554,9 @@ def data_listener(n):
     mision_time = functions.get_time_mision(time_starter)
 
 
-  pila_value =   np.random.randint(5,101)
-  pila_value_str = str(pila_value) + "%"
-  if pila_value < 20:
+  if pila_value == 1000:
+    pila = dash.no_update
+  elif pila_value < 20:
     pila = [html.Div(
               className="pila-pila",
               style={'height': pila_value_str, "background-color": "#F95738"}
