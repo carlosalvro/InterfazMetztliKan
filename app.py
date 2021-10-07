@@ -4,9 +4,11 @@ from dash import html
 from pkg_resources import set_extraction_path
 import os
 import numpy as np
+import pandas as pd
 
 import functions
 import time
+from datetime import  datetime
 
 PATH_IMGS = r'./Imagenes'
 IMGS = os.listdir(PATH_IMGS)
@@ -24,7 +26,7 @@ app.layout= html.Div(
   className="main-container",
   children=[
     html.P("True",id="hidden-p", style={'display': 'none'}),
-    html.P("True",id="2hidden-p", style={'display': 'none'}),
+    html.P("False",id="2hidden-p", style={'display': 'none'}),
     html.Section(id="modal", className="pop-up-container", hidden=True,children=[
       html.H4("¿Quieres guardar los datos?"),
       html.Div(
@@ -438,7 +440,7 @@ def mision_starter_stopper(start, stop):
     clicked_button = ctx.triggered[0]['prop_id'].split('.')[0] .split('-')[0]
   
   if clicked_button=="start":
-    print("Se presiono start")
+    # print("Se presiono start")
     if active == False:
       time_starter = time.time()
       dic = {"A":[], "G": []}
@@ -447,14 +449,13 @@ def mision_starter_stopper(start, stop):
       raise dash.exceptions.PreventUpdate
 
   elif clicked_button=="stop":
-    print("Se presiono stop")
+    # print("Se presiono stop")
     if active == True:
       active = False
     else: 
       raise dash.exceptions.PreventUpdate
   return None
 
-popup_active = False
 @app.callback(
     dash.dependencies.Output("modal", "style"),
     dash.dependencies.Output("2hidden-p", "children"),
@@ -464,17 +465,38 @@ popup_active = False
     [dash.dependencies.State("2hidden-p", "children")],
 )
 def toggle_modal(stop, guardar, cerrar, is_visible):
+  global df_data
+
+  ctx = dash.callback_context
+
+  if not ctx.triggered:
+    raise dash.exceptions.PreventUpdate
+  else:
+    clicked_button = ctx.triggered[0]['prop_id'].split('.')[0] .split('-')[0]  
+  
+  # print(clicked_button)
+
   if is_visible=="True":
-    print('Esta abierto')
+    # print('Esta abierto')
     new_visibility = "False"
     style={"visibility":"hidden"}
   else:
-    print("Cerrado")
+    # print("Cerrado")
     new_visibility = "True"
     style={"visibility":"visible"}
+
+  if clicked_button == "guardar":
+    hora = functions.current_time()
+    fecha = functions.today_date().replace("/","-")
+    file_name = "datos-" + fecha + "-" + hora + ".csv"
+    df_data.to_csv("./DatosGuardados/"+ file_name, index=False, mode="a", header=True)
+
   
   return style, new_visibility
 
+
+previa_ve = 0
+df_data = pd.DataFrame() 
 ## ESTA ES LA FUNCIÓN QUE ACTUALIZA LOS VALORES
 ## RECIBE AL CONTADOR LLAMADO INTERVAL DE LA LINEA 47
 ## EL CONTADOR LE DA LA SEÑAL PARA QUE LOS OUTPUTS SE REFRESQUEN
@@ -499,7 +521,7 @@ def toggle_modal(stop, guardar, cerrar, is_visible):
   [dash.dependencies.Input('interval-component', 'n_intervals')] 
 )
 def data_listener(n):
-  global dic, active, time_starter
+  global dic, active, time_starter, previa_ve, df_data
 
   if active == False:
     raise dash.exceptions.PreventUpdate
@@ -538,12 +560,19 @@ def data_listener(n):
     gx = output['Gx']
     gy = output['Gy']
     gz = output['Gz']
-    ve = output['Ve']
     pila_value = output['Bat']  
     pila_value_str = str(pila_value) + "%"
     g,a = functions.graphs_values(output)
+    previa_ve += a * 0.5
+    ve = round(previa_ve, 2)
     dic['A'].append(a)
     dic['G'].append(g)
+    output['A'] = a
+    output['G'] = g
+    output['Ve'] = ve 
+    output['Time'] = datetime.now().strftime("%H:%M:%S")
+    df_data = df_data.append(output, ignore_index=True)
+
     graph_giro_ace = functions.plot_graphs_ace_giro(dic)
 
 
@@ -626,14 +655,14 @@ def image_controler(adelante, atras, H, S, V, gauss, median, reset):
 
   if gauss!=gau:
     image = functions.gaussian_blur(image)
-    print("Apply 1 time gauss")
+    # print("Apply 1 time gauss")
     gau = gauss
   else:
     pass
 
   if median!=med:
     image = functions.median_blur(image)
-    print("Apply 1 time median")
+    # print("Apply 1 time median")
     med =median
 
   if reset!= res:
