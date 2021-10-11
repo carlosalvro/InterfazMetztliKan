@@ -1,14 +1,18 @@
 import dash
-from dash import dcc
-from dash import html
+import dash_core_components as dcc
+import dash_html_components as html
 from pkg_resources import set_extraction_path
 import os
 import numpy as np
 import pandas as pd
+import json
 
 import functions
 import time
 from datetime import  datetime
+
+
+conexion = functions.serial_Monitor("COM3")
 
 PATH_IMGS = r'./Imagenes'
 IMGS = os.listdir(PATH_IMGS)
@@ -430,7 +434,7 @@ dic = {"A":[], "G": []}
   dash.dependencies.Input('stop-button', 'n_clicks')]
 )
 def mision_starter_stopper(start, stop):
-  global active, dic, time_starter
+  global active, dic, time_starter, conexion
   
   ctx = dash.callback_context
 
@@ -442,6 +446,7 @@ def mision_starter_stopper(start, stop):
   if clicked_button=="start":
     # print("Se presiono start")
     if active == False:
+      conexion.init_connection()
       time_starter = time.time()
       dic = {"A":[], "G": []}
       active = True
@@ -449,8 +454,9 @@ def mision_starter_stopper(start, stop):
       raise dash.exceptions.PreventUpdate
 
   elif clicked_button=="stop":
-    # print("Se presiono stop")
+    print("Se presiono stop")
     if active == True:
+      conexion.close_connection()
       active = False
     else: 
       raise dash.exceptions.PreventUpdate
@@ -486,9 +492,11 @@ def toggle_modal(stop, guardar, cerrar, is_visible):
     style={"visibility":"visible"}
 
   if clicked_button == "guardar":
-    hora = functions.current_time()
+    hora = functions.current_time().replace(":",".")
     fecha = functions.today_date().replace("/","-")
     file_name = "datos-" + fecha + "-" + hora + ".csv"
+    print(file_name)
+    print(df_data)
     df_data.to_csv("./DatosGuardados/"+ file_name, index=False, mode="a", header=True)
 
   
@@ -526,11 +534,24 @@ def data_listener(n):
   if active == False:
     raise dash.exceptions.PreventUpdate
 
+
+  output = conexion.collect_data()
+  # output = json.loads(output)
+  if output== None:
+    raise dash.exceptions.PreventUpdate
+  
+  print(output)
+  print("                                       ")
+  output = functions.limpiar_trama(output)
+  if output == None:
+    raise dash.exceptions.PreventUpdate
+  print(output)
+  print("---------------------------------------")
   # try:
   #   output = functions.open_serial(4) # ESTA FUNCIÓN TRAE LOS VALORES DEL PUERTO SERIAL Cambiar puerto si es necesario
   # except:
   #   print("Error al conectar con puerto serial")
-  output = functions.random_generator()
+  # output = functions.random_generator()
 
   if output == None:
     al = dash.no_update
@@ -560,8 +581,8 @@ def data_listener(n):
     gx = output['Gx']
     gy = output['Gy']
     gz = output['Gz']
-    pila_value = output['Bat']  
-    pila_value_str = str(pila_value) + "%"
+    pila_value_str = output['Bat'] + "%"
+    pila_value = int(output['Bat']) 
     g,a = functions.graphs_values(output)
     previa_ve += a * 0.5
     ve = round(previa_ve, 2)

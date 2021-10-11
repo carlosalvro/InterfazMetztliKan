@@ -9,6 +9,7 @@ import json
 import re
 from datetime import date, datetime, timedelta
 import time
+import sys
 
 
 
@@ -163,6 +164,60 @@ def gaussian_blur(file):
 #   pattern = r"[\[\{](.+)[\]\}]"
 #   return re.match(pattern, prueba).group(1)
 
+class serial_Monitor():
+  
+  def __init__(self, address, baudrate = 115200):
+    self.ser = None
+    self.address = address
+    self.baudrate = baudrate
+
+  def init_connection(self):
+    print("Start Serial Connection")
+    try:
+      ser = serial.Serial(self.address, baudrate = self.baudrate)
+      print("conectado")
+    except:
+      print("Wrong serial address")
+      sys.exit()
+
+    self.ser = ser
+
+  def close_connection(self):
+    print("Close Serial Connection")
+    self.ser.close()
+
+  def collect_data(self):
+    bytesToRead = self.ser.in_waiting
+    if bytesToRead>0:
+      ser_bytes = self.ser.read(bytesToRead)
+      # convert byte to string python 3
+      ser_bytes = ser_bytes.decode("utf-8")
+      return ser_bytes
+    
+
+def limpiar_trama(t):
+  trama_sin_llaves =  re.search(r"\{(.+)\}", t)
+
+  if trama_sin_llaves:
+    print("Trama completa")
+    trama_sin_llaves = trama_sin_llaves.group(1)
+  else:
+    return None
+  
+  pares = re.split(r",", trama_sin_llaves)
+
+  keys = []
+  values = []
+  for par in pares:
+    key = re.search(r"\"(\w+)\" *:", par).group(1)
+    value = re.search(r": *\"(-*\d+)\"", par).group(1)
+
+    keys.append(key)
+    values.append(value)
+
+  dictionary = dict(zip(keys, values)) 
+
+  return dictionary 
 
 def open_serial(port):
   complete_port = '/dev/pts/'+ str(port) 
